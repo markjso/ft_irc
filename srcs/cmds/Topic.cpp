@@ -1,0 +1,62 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Topic.cpp                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jaeshin <jaeshin@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/03/22 16:00:37 by jaeshin           #+#    #+#             */
+/*   Updated: 2024/04/09 17:28:08 by jmarks           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../../includes/Command.hpp"
+
+Topic::Topic(Server *server, bool auth): Command(server, auth) {};
+
+Topic::~Topic() {};
+
+void Topic::execute(Client *client, vector<string> args) {
+	size_t argSize = args.size();
+	Channel *channel = client->getChannel();
+	if (!channel) {
+         client->handleNotOnChannel();
+		return ;
+	} if (argSize < 2) {
+		client->reply(ERR_NEEDMOREPARAMS(client->getNickname(), "TOPIC"));
+		return ;
+	}
+	// check the topic
+	if (argSize == 2) {
+		if (channel->getName() != args[1]) {
+			client->reply(ERR_NOTONCHANNEL(channel->getName()));
+			return ;
+		}
+		if (channel->getTopic() == "") {
+			client->reply(RPL_NOTOPIC(channel->getName()));
+			return ;
+		} else {
+			client->reply(RPL_TOPIC(channel->getName(), channel->getTopic()));
+			return ;
+		}
+	}
+	// set a new topic
+	if (argSize >= 3) {
+		if (channel->getName() != args[1]) {
+			client->reply(ERR_NOTONCHANNEL(channel->getName()));
+			return ;
+		} else if (channel->getTopicRestrict() &&\
+					!channel->searchOperator(client->getNickname())) {
+			client->reply(ERR_CHANOPRIVSNEEDED(channel->getName()));
+			return ;
+		}
+		string topic = " TOPIC: ";
+		size_t i = 2;
+		while (i <= argSize - 1) {
+			topic += args[i] + " ";
+			i++;
+		}
+		channel->setTopic(topic);
+		channel->broadcast(client, RPL_TOPIC(channel->getName(), topic), false);
+	}
+};

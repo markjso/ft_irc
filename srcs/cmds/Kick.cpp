@@ -6,7 +6,7 @@
 /*   By: jaeshin <jaeshin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 13:44:07 by jaeshin           #+#    #+#             */
-/*   Updated: 2024/03/27 16:08:59 by jaeshin          ###   ########.fr       */
+/*   Updated: 2024/04/09 18:02:08 by jmarks           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,10 @@ Kick::~Kick() {};
 
 void Kick::execute(Client *client, vector<string> args) {
 	Channel *channel = client->getChannel();
-	if (args.size() < 3) {
+	if (!channel) {
+    client->handleNotOnChannel();
+    return;
+	} if (args.size() < 3) {
 		client->reply(ERR_NEEDMOREPARAMS(client->getNickname(), "KICK"));
 		return ;
 	} else if (!channel->searchOperator(client->getNickname())) {

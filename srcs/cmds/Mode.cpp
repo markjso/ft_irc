@@ -6,7 +6,7 @@
 /*   By: jaeshin <jaeshin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/19 21:10:32 by jaeshin           #+#    #+#             */
-/*   Updated: 2024/03/25 16:31:23 by jaeshin          ###   ########.fr       */
+/*   Updated: 2024/04/09 18:02:50 by jmarks           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,10 @@ Mode::~Mode() {};
 void Mode::execute(Client *client, vector<string> args) {
 	/* Handles MODE error */
 	Channel *channel = client->getChannel();
-	if (args.size() < 2) {
+	if (!channel) {
+    	client->handleNotOnChannel();
+    	return;
+	} if (args.size() < 2) {
 		client->reply(ERR_NEEDMOREPARAMS(client->getNickname(), "MODE"));
 		return ;
 	} else if (!channel) {
